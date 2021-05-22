@@ -42,8 +42,7 @@ $ cd nextjs\
 $ set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 $ Get-ExecutionPolicy
 $ yarn install
-$ yarn run next build
-$ yarn run next export -o dist
+$ yarn run next export-win
 $ cd ..
 $ go build main.go
 ```

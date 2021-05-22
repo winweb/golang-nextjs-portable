@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "export": "rm -rf .next && next build && next export -o dist"
+    "export": "rm -rf .next && next build && next export -o dist",
+    "export-win": "del /s /q .next && next build && next export -o dist"
   },
   "dependencies": {
     "next": "10.1.3",
