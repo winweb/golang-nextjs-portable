@@ -39,8 +39,8 @@ On Windows PowerShell
 
 ```bat
 $ cd nextjs\
-$ cd set-ExecutionPolicy RemoteSigned -Scope CurrentUser
-$ cd Get-ExecutionPolicy
+$ set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+$ Get-ExecutionPolicy
 $ yarn install
 $ yarn run next build
 $ yarn run next export -o dist
@@ -59,7 +59,7 @@ $ ./golang-nextjs-portable
 On Windows PowerShell
 
 ```bat
-$ ./main.exemai
+$ ./main.exe
 
 2021/05/22 20:29:22 Starting HTTP server at http://localhost:8080 ...
 ```
