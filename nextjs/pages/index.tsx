@@ -1,14 +1,31 @@
 import styles from '../styles/index.module.sass'
 import Link from "next/link";
 import useSWR from "swr";
+import React from 'react';
+import { Suspense } from 'react'
+
+
 
 async function fetcher(url: string) {
   const resp = await fetch(url);
   return resp.text();
 }
 
+const fetcherJson = url => fetch(url).then(r => r.json())
+
 function Index(): JSX.Element {
   const { data, error } = useSWR("/api", fetcher, { refreshInterval: 1000 });
+
+  function Profile() {
+    const { data } = useSWR('/all', fetcherJson, { refreshInterval: 0 })
+    console.dir(data)
+
+     return (<div>
+              {data && data.map(todo => (
+                <div key={todo.Id}>{todo.Id} name: {todo.Name +" "+ todo.Surname}</div>
+              ))}
+            </div>);
+          }
 
   return (
     <div className={styles.error}>
@@ -28,7 +45,10 @@ function Index(): JSX.Element {
       )}
       {!error && !data && <p>Loading ...</p>}
       {!error && data && <pre>{data}</pre>}
-    </div>
+
+        <Profile/>
+
+      </div>
   );
 }
 

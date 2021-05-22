@@ -7,6 +7,10 @@ module.exports = {
         source: "/api",
         destination: "http://localhost:8080/api",
       },
+      {
+        source: "/all",
+        destination: "http://localhost:8080/all",
+      },
     ];
   },
   future: {

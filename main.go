@@ -1,11 +1,17 @@
 package main
 
 import (
+	"database/sql"
 	"embed"
+	"encoding/json"
+	"fmt"
 	"io/fs"
 	"log"
 	"net/http"
 	"runtime/pprof"
+	"strconv"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 //go:embed nextjs/dist
@@ -21,14 +27,67 @@ func main() {
 		log.Fatal(err)
 	}
 
+	initial()
+
 	// The static Next.js app will be served under `/`.
 	http.Handle("/", http.FileServer(http.FS(distFS)))
 	// The API will be served under `/api`.
 	http.HandleFunc("/api", handleAPI)
 
+	http.HandleFunc("/all", allPeople)
+
 	// Start HTTP server at :8080.
 	log.Println("Starting HTTP server at http://localhost:8080 ...")
 	log.Fatal(http.ListenAndServe(":8080", nil))
+
+}
+
+var (
+	db *sql.DB
+)
+
+type People struct {
+	Id      int
+	Name    string
+	Surname string
+}
+
+func initial() (err error) {
+	log.Println("initial data ...")
+
+	db, err = sql.Open("sqlite3", "./date_file.db")
+	if err != nil {
+		log.Println("database error")
+		return err
+	}
+	statement, _ := db.Prepare("CREATE TABLE IF NOT EXISTS people (id INTEGER PRIMARY KEY, name TEXT, surname TEXT)")
+	statement.Exec()
+	statement, _ = db.Prepare("INSERT INTO people (name, surname) VALUES (?, ?)")
+	statement.Exec("Nic", "Raboy")
+	statement.Exec("Nic2", "Raboy2")
+	statement.Exec("Nic3", "Raboy3")
+
+	return nil
+}
+
+func allPeople(w http.ResponseWriter, _ *http.Request) {
+	log.Println("all people ...")
+
+	rows, _ := db.Query("SELECT id, name, surname FROM people")
+	var result []People
+	for rows.Next() {
+		item := People{}
+
+		rows.Scan(&item.Id, &item.Name, &item.Surname)
+
+		result = append(result, item)
+
+		log.Println(strconv.Itoa(item.Id) + ": " + item.Name + " " + item.Surname)
+	}
+
+	jsonB, _ := json.Marshal(result)
+
+	fmt.Fprintf(w, "%s", string(jsonB))
 }
 
 func handleAPI(w http.ResponseWriter, _ *http.Request) {
