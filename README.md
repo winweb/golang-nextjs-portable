@@ -11,7 +11,7 @@ through this project.
 
 ## Requirements
 
-- Go 1.16
+- Go 1.16.4
 - Yarn
 
 ## Installing
@@ -42,7 +42,7 @@ $ cd nextjs\
 $ set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 $ Get-ExecutionPolicy
 $ yarn install
-$ yarn run next export-win
+$ yarn run export-win
 $ cd ..
 $ go build main.go
 ```
@@ -61,6 +61,12 @@ On Windows PowerShell
 $ ./main.exe
 
 2021/05/22 20:29:22 Starting HTTP server at http://localhost:8080 ...
+```
+
+On Docker
+
+```sh
+docker build .
 ```
 
 ## License
