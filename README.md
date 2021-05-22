@@ -35,12 +35,33 @@ $ cd ..
 $ go build main.go
 ```
 
+On Windows PowerShell
+
+```bat
+$ cd nextjs\
+$ cd set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+$ cd Get-ExecutionPolicy
+$ yarn install
+$ yarn run next build
+$ yarn run next export -o dist
+$ cd ..
+$ go build main.go
+```
+
 Then run the binary:
 
 ```sh
 $ ./golang-nextjs-portable
 
 2021/04/27 14:55:38 Starting HTTP server at http://localhost:8080 ...
+```
+
+On Windows PowerShell
+
+```bat
+$ ./main.exemai
+
+2021/05/22 20:29:22 Starting HTTP server at http://localhost:8080 ...
 ```
 
 ## License
