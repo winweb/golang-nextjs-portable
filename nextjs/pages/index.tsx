@@ -1,3 +1,4 @@
+import styles from '../styles/index.module.sass'
 import Link from "next/link";
 import useSWR from "swr";
 
@@ -10,8 +11,8 @@ function Index(): JSX.Element {
   const { data, error } = useSWR("/api", fetcher, { refreshInterval: 1000 });
 
   return (
-    <div>
-      <h1>Hello, world!</h1>
+    <div className={styles.error}>
+      <h1>Hello, world error!</h1>
       <p>
         This is <code>pages/index.tsx</code>.
       </p>
