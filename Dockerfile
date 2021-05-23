@@ -10,10 +10,13 @@ COPY nextjs/ .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN yarn run export
 
-FROM golang:${GO_VERSION}-alpine AS go-builder
+FROM golang:${GO_VERSION} AS go-builder
 WORKDIR /app
 COPY go.mod main.go ./
 COPY --from=node-builder /app/dist ./nextjs/dist
+RUN go mod download github.com/mattn/go-sqlite3
+RUN go get -d -v ./...
+RUN go install -v ./...
 RUN go build .
 
 FROM alpine:${ALPINE_VERSION}
