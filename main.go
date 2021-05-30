@@ -64,13 +64,24 @@ func initial() (err error) {
 	/*
 		normal sql command
 		PRAGMA journal_mode = WAL;
+	    PRAGMA locking_mode = EXCLUSIVE;
 		PRAGMA synchronous = normal;
 		PRAGMA temp_store = memory;
 	*/
-	db, err = sql.Open("sqlite3", "./date_file.db?_journal_mode=WAL&_synchronous=NORMAL&mode=shared&_busy_timeout=10000")
+	db, err = sql.Open("sqlite3", "./date_file.db?_journal_mode=WAL&_synchronous=NORMAL&mode=shared&_busy_timeout=20000")
 	if err != nil {
 		log.Println("database error")
 		return err
+	}
+
+	if _, err = db.Exec("PRAGMA page_size= 2048;"); err != nil {
+		log.Printf("Failed to Exec PRAGMA page_size: %v", err)
+	}
+	if _, err = db.Exec("PRAGMA cache_size= 8192;"); err != nil {
+		log.Printf("Failed to Exec PRAGMA cache_size: %v", err)
+	}
+	if _, err = db.Exec("PRAGMA mmap_size = 25600000000;"); err != nil {
+		log.Printf("Failed to Exec PRAGMA mmap_size: %v", err)
 	}
 
 	ddl := `
