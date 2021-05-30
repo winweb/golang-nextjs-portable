@@ -60,12 +60,22 @@ func initial() (err error) {
 		log.Println("database error")
 		return err
 	}
+
 	statement, _ := db.Prepare("CREATE TABLE IF NOT EXISTS people (id INTEGER PRIMARY KEY, name TEXT, surname TEXT)")
 	statement.Exec()
-	statement, _ = db.Prepare("INSERT INTO people (name, surname) VALUES (?, ?)")
-	statement.Exec("Nic", "Raboy")
-	statement.Exec("Nic2", "Raboy2")
-	statement.Exec("Nic3", "Raboy3")
+
+
+	var count int
+	_ = db.QueryRow("SELECT COUNT(*) FROM people").Scan(&count)
+
+	if count == 0 {
+		statement, _ = db.Prepare("INSERT INTO people (name, surname) VALUES (?, ?)")
+		statement.Exec("Nic1", "Robert1")
+		statement.Exec("Nic2", "Robert2")
+		statement.Exec("Nic3", "Robert3")
+	} else {
+		log.Println("not initial data.")
+	}
 
 	return nil
 }
@@ -82,7 +92,8 @@ func allPeople(w http.ResponseWriter, _ *http.Request) {
 
 		result = append(result, item)
 
-		log.Println(strconv.Itoa(item.Id) + ": " + item.Name + " " + item.Surname)
+		var output = strconv.Itoa(item.Id) + ": " + item.Name + " " + item.Surname
+		log.Println(output)
 	}
 
 	jsonB, _ := json.Marshal(result)
