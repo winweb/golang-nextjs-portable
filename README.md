@@ -47,6 +47,12 @@ $ cd ..
 $ go build main.go
 ```
 
+Run Go unit test
+
+```sh
+$ go test -v
+```
+
 Then run the binary:
 
 ```sh
