@@ -36,6 +36,8 @@ func main() {
 
 	http.HandleFunc("/all", allPeople)
 
+	http.HandleFunc("/add", addPeople)
+
 	// Start HTTP server at :8080.
 	log.Println("Starting HTTP server at http://localhost:8080 ...")
 	log.Fatal(http.ListenAndServe(":8080", nil))
@@ -44,6 +46,10 @@ func main() {
 
 var (
 	db *sql.DB
+	statement *sql.Stmt
+	res sql.Result
+	increase int64
+	lid int64
 )
 
 type People struct {
@@ -61,7 +67,7 @@ func initial() (err error) {
 		PRAGMA synchronous = normal;
 		PRAGMA temp_store = memory;
 	*/
-	db, err = sql.Open("sqlite3", "./date_file.db?_journal_mode=WAL&_synchronous=NORMAL&mode=memory")
+	db, err = sql.Open("sqlite3", "./date_file.db?_journal_mode=WAL&_synchronous=NORMAL&mode=shared&_busy_timeout=10000")
 	if err != nil {
 		log.Println("database error")
 		return err
@@ -73,16 +79,23 @@ func initial() (err error) {
             name TEXT,
             surname TEXT
         );
-
-        CREATE UNIQUE INDEX IF NOT EXISTS id ON people (id);
     `
-
 	statement, _ := db.Prepare(ddl)
+
+	_, err = db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS people_id_index ON people (id);")
+	if err != nil {
+		log.Printf("not create index. : %v", err)
+	} else {
+		log.Println("create index.")
+	}
+
 	statement.Exec()
 
 
-	var count int
+	var count int64
 	_ = db.QueryRow("SELECT COUNT(*) FROM people").Scan(&count)
+
+	increase = count
 
 	if count == 0 {
 		statement, _ = db.Prepare("INSERT INTO people (name, surname) VALUES (?, ?)")
@@ -100,6 +113,9 @@ func allPeople(w http.ResponseWriter, _ *http.Request) {
 	log.Println("all people ...")
 
 	rows, _ := db.Query("SELECT id, name, surname FROM people")
+
+	defer rows.Close()
+
 	var result []People
 	for rows.Next() {
 		item := People{}
@@ -108,11 +124,43 @@ func allPeople(w http.ResponseWriter, _ *http.Request) {
 
 		result = append(result, item)
 
-		var output = strconv.Itoa(item.Id) + ": " + item.Name + " " + item.Surname
-		log.Println(output)
+		var _ = strconv.Itoa(item.Id) + ": " + item.Name + " " + item.Surname
+		//log.Println(output)
 	}
 
 	jsonB, _ := json.Marshal(result)
+
+	fmt.Fprintf(w, "%s", string(jsonB))
+}
+
+func addPeople(w http.ResponseWriter, r *http.Request) {
+
+	increase++
+
+	log.Printf("add people no.: %v\n", increase)
+
+	statement, _ = db.Prepare("INSERT INTO people (name, surname) VALUES (?, ?)")
+
+	var res sql.Result
+	res, _ = statement.Exec(
+		"Nic" + strconv.FormatInt(increase, 10),
+		"Robert" + strconv.FormatInt(increase, 10),
+	)
+
+	lid, _ = res.LastInsertId()
+
+	log.Printf("lid: %v\n", lid)
+
+	rows, _ := db.Query("SELECT id, name, surname FROM people WHERE id = " + strconv.FormatInt(lid, 10))
+
+	defer rows.Close()
+
+	var item = People{}
+	if rows.Next() {
+		rows.Scan(&item.Id, &item.Name, &item.Surname)
+	}
+
+	jsonB, _ := json.Marshal(item)
 
 	fmt.Fprintf(w, "%s", string(jsonB))
 }

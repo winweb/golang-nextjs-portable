@@ -53,6 +53,12 @@ Run Go unit test
 $ go test -v
 ```
 
+Run Stress test
+
+```bat
+$ C:\xampp\apache\bin\ab.exe -k -c 700 -n 15000 http://localhost:8080/add
+```
+
 Then run the binary:
 
 ```sh
