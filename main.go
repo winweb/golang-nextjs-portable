@@ -55,13 +55,29 @@ type People struct {
 func initial() (err error) {
 	log.Println("initial data ...")
 
-	db, err = sql.Open("sqlite3", "./date_file.db")
+	/*
+		normal sql command
+		PRAGMA journal_mode = WAL;
+		PRAGMA synchronous = normal;
+		PRAGMA temp_store = memory;
+	*/
+	db, err = sql.Open("sqlite3", "./date_file.db?_journal_mode=WAL&_synchronous=NORMAL&mode=memory")
 	if err != nil {
 		log.Println("database error")
 		return err
 	}
 
-	statement, _ := db.Prepare("CREATE TABLE IF NOT EXISTS people (id INTEGER PRIMARY KEY, name TEXT, surname TEXT)")
+	ddl := `
+        CREATE TABLE IF NOT EXISTS people (
+            id INTEGER PRIMARY KEY,
+            name TEXT,
+            surname TEXT
+        );
+
+        CREATE UNIQUE INDEX IF NOT EXISTS id ON people (id);
+    `
+
+	statement, _ := db.Prepare(ddl)
 	statement.Exec()
 
 
