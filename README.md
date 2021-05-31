@@ -56,7 +56,7 @@ $ go test -v
 Run Stress test
 
 ```bat
-$ C:\xampp\apache\bin\ab.exe -k -p test.json -T application/json -c 10000 -n 50000 http://localhost:8080/add
+$ C:\xampp\apache\bin\ab.exe -k -p test.json -T application/json -c 10000 -n 60000 http://localhost:8080/add
 ```
 
 Then run the binary:

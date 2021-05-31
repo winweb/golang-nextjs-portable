@@ -76,7 +76,7 @@ func initial() (err error) {
 		PRAGMA synchronous = normal;
 		PRAGMA temp_store = memory;
 	*/
-	db, err = sql.Open("sqlite3", "./date_file.db?_journal_mode=WAL&_synchronous=NORMAL&mode=shared&_busy_timeout=20000")
+	db, err = sql.Open("sqlite3", "./date_file.db?_journal_mode=WAL&_synchronous=NORMAL&mode=rwc&cache=shared&_busy_timeout=20000")
 	if err != nil {
 		log.Println("database error")
 		return err
@@ -84,13 +84,13 @@ func initial() (err error) {
 
 	db.SetMaxOpenConns(1)
 
-	if _, err = db.Exec("PRAGMA page_size= 2048;"); err != nil {
+	if _, err = db.Exec("PRAGMA page_size= 65535;"); err != nil {
 		log.Printf("Failed to Exec PRAGMA page_size: %v", err)
 	}
-	if _, err = db.Exec("PRAGMA cache_size= 8192;"); err != nil {
+	if _, err = db.Exec("PRAGMA cache_size= 8000;"); err != nil {
 		log.Printf("Failed to Exec PRAGMA cache_size: %v", err)
 	}
-	if _, err = db.Exec("PRAGMA mmap_size = 25600000000;"); err != nil {
+	if _, err = db.Exec("PRAGMA mmap_size = 30000000000;"); err != nil {
 		log.Printf("Failed to Exec PRAGMA mmap_size: %v", err)
 	}
 
