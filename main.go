@@ -53,9 +53,9 @@ var (
 )
 
 type People struct {
-	Id      int
-	Name    string
-	Surname string
+	Id      int    `json:"id"`
+	Name    string `json:"name"`
+	Surname string `json:"surname"`
 }
 
 func initial() (err error) {
@@ -150,6 +150,13 @@ func allPeople(w http.ResponseWriter, _ *http.Request) {
 
 func addPeople(w http.ResponseWriter, r *http.Request) {
 
+	decoder := json.NewDecoder(r.Body)
+	var temp People
+	err := decoder.Decode(&temp)
+	if err != nil {
+		panic(err)
+	}
+
 	noPeople++
 
 	log.Printf("add people no.: %v\n", noPeople)
@@ -158,13 +165,11 @@ func addPeople(w http.ResponseWriter, r *http.Request) {
 
 	var res sql.Result
 	res, _ = stmt.Exec(
-		"Nic" + strconv.FormatInt(noPeople, 10),
-		"Robert" + strconv.FormatInt(noPeople, 10),
+		temp.Name + strconv.FormatInt(noPeople, 10),
+		temp.Surname + strconv.FormatInt(noPeople, 10),
 	)
 
 	lid, _ = res.LastInsertId()
-
-	log.Printf("lid: %v\n", lid)
 
 	rows, _ := db.Query("SELECT id, name, surname FROM people WHERE id = " + strconv.FormatInt(lid, 10))
 
@@ -174,6 +179,8 @@ func addPeople(w http.ResponseWriter, r *http.Request) {
 	if rows.Next() {
 		rows.Scan(&item.Id, &item.Name, &item.Surname)
 	}
+
+	log.Printf("add %#v\n", item)
 
 	jsonB, _ := json.Marshal(item)
 

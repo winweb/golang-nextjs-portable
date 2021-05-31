@@ -22,7 +22,7 @@ function Index(): JSX.Element {
 
      return (<div>
               {data && data.map(todo => (
-                <div key={todo.Id}>{todo.Id} name: {todo.Name +" "+ todo.Surname}</div>
+                <div key={todo.id}>{todo.Id} name: {todo.name +" "+ todo.surname}</div>
               ))}
             </div>);
           }
