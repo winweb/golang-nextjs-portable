@@ -29,7 +29,7 @@ function Index(): JSX.Element {
 
   return (
     <div className={styles.error}>
-      <h1>Hello, world error!</h1>
+      <h1>Hello, world!</h1>
       <p>
         This is <code>pages/index.tsx</code>.
       </p>

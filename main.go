@@ -4,14 +4,16 @@ import (
 	"database/sql"
 	"embed"
 	"encoding/json"
-	"fmt"
+	"github.com/gofiber/adaptor/v2"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/filesystem"
+	//"github.com/gofiber/fiber/v2/middleware/pprof"
+	_ "github.com/mattn/go-sqlite3"
 	"io/fs"
 	"log"
 	"net/http"
 	"runtime/pprof"
 	"strconv"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 //go:embed nextjs/dist
@@ -29,19 +31,25 @@ func main() {
 
 	initial()
 
+	app := fiber.New()
+
 	// The static Next.js app will be served under `/`.
-	http.Handle("/", http.FileServer(http.FS(distFS)))
+	app.Use(filesystem.New(filesystem.Config{
+		Root: http.FS(distFS),
+	}))
+
 	// The API will be served under `/api`.
-	http.HandleFunc("/api", handleAPI)
+	app.Get("/api", adaptor.HTTPHandlerFunc(handleAPI))
 
-	http.HandleFunc("/all", allPeople)
+	//app.Use(pprof.New()) ///debug/pprof
 
-	http.HandleFunc("/add", addPeople)
+	app.Get("/all", allPeople)
+
+	app.Post("/add", addPeople)
 
 	// Start HTTP server at :8080.
 	log.Println("Starting HTTP server at http://localhost:8080 ...")
-	log.Fatal(http.ListenAndServe(":8080", nil))
-
+	log.Fatal(app.Listen(":8080"))
 }
 
 var (
@@ -124,7 +132,7 @@ func initial() (err error) {
 	return nil
 }
 
-func allPeople(w http.ResponseWriter, _ *http.Request) {
+func allPeople(c *fiber.Ctx) error{
 	log.Println("all people ...")
 
 	rows, _ := db.Query("SELECT id, name, surname FROM people")
@@ -145,16 +153,18 @@ func allPeople(w http.ResponseWriter, _ *http.Request) {
 
 	jsonB, _ := json.Marshal(result)
 
-	fmt.Fprintf(w, "%s", string(jsonB))
+	return c.Type("json", "utf-8").Status(fiber.StatusOK).Send(jsonB)
 }
 
-func addPeople(w http.ResponseWriter, r *http.Request) {
+func addPeople(c *fiber.Ctx) error{
 
-	decoder := json.NewDecoder(r.Body)
-	var temp People
-	err := decoder.Decode(&temp)
+
+	var body People
+	err := c.BodyParser(&body)
 	if err != nil {
-		panic(err)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Cannot parse JSON",
+		})
 	}
 
 	noPeople++
@@ -165,8 +175,8 @@ func addPeople(w http.ResponseWriter, r *http.Request) {
 
 	var res sql.Result
 	res, _ = stmt.Exec(
-		temp.Name + strconv.FormatInt(noPeople, 10),
-		temp.Surname + strconv.FormatInt(noPeople, 10),
+		body.Name + strconv.FormatInt(noPeople, 10),
+		body.Surname + strconv.FormatInt(noPeople, 10),
 	)
 
 	lid, _ = res.LastInsertId()
@@ -184,8 +194,9 @@ func addPeople(w http.ResponseWriter, r *http.Request) {
 
 	jsonB, _ := json.Marshal(item)
 
-	fmt.Fprintf(w, "%s", string(jsonB))
+	return c.Type("json", "utf-8").Status(fiber.StatusOK).Send(jsonB)
 }
+
 
 func handleAPI(w http.ResponseWriter, _ *http.Request) {
 	// Gather memory allocations profile.
