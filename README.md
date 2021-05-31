@@ -56,7 +56,7 @@ $ go test -v
 Run Stress test
 
 ```bat
-$ C:\xampp\apache\bin\ab.exe -k -c 900 -n 15000 http://localhost:8080/add
+$ C:\xampp\apache\bin\ab.exe -k -c 10000 -n 100000 http://localhost:8080/add
 ```
 
 Then run the binary:

@@ -45,11 +45,11 @@ func main() {
 }
 
 var (
-	db *sql.DB
-	statement *sql.Stmt
-	res sql.Result
-	increase int64
-	lid int64
+	db       *sql.DB
+	stmt     *sql.Stmt
+	res      sql.Result
+	noPeople int64
+	lid      int64
 )
 
 type People struct {
@@ -73,6 +73,8 @@ func initial() (err error) {
 		log.Println("database error")
 		return err
 	}
+
+	db.SetMaxOpenConns(1)
 
 	if _, err = db.Exec("PRAGMA page_size= 2048;"); err != nil {
 		log.Printf("Failed to Exec PRAGMA page_size: %v", err)
@@ -106,7 +108,9 @@ func initial() (err error) {
 	var count int64
 	_ = db.QueryRow("SELECT COUNT(*) FROM people").Scan(&count)
 
-	increase = count
+	noPeople = count
+
+	log.Printf("no. people: %v", count)
 
 	if count == 0 {
 		statement, _ = db.Prepare("INSERT INTO people (name, surname) VALUES (?, ?)")
@@ -114,7 +118,7 @@ func initial() (err error) {
 		statement.Exec("Nic2", "Robert2")
 		statement.Exec("Nic3", "Robert3")
 	} else {
-		log.Println("not initial data.")
+		log.Println("not initial people data.")
 	}
 
 	return nil
@@ -146,16 +150,16 @@ func allPeople(w http.ResponseWriter, _ *http.Request) {
 
 func addPeople(w http.ResponseWriter, r *http.Request) {
 
-	increase++
+	noPeople++
 
-	log.Printf("add people no.: %v\n", increase)
+	log.Printf("add people no.: %v\n", noPeople)
 
-	statement, _ = db.Prepare("INSERT INTO people (name, surname) VALUES (?, ?)")
+	stmt, _ = db.Prepare("INSERT INTO people (name, surname) VALUES (?, ?)")
 
 	var res sql.Result
-	res, _ = statement.Exec(
-		"Nic" + strconv.FormatInt(increase, 10),
-		"Robert" + strconv.FormatInt(increase, 10),
+	res, _ = stmt.Exec(
+		"Nic" + strconv.FormatInt(noPeople, 10),
+		"Robert" + strconv.FormatInt(noPeople, 10),
 	)
 
 	lid, _ = res.LastInsertId()
