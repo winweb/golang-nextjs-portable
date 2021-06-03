@@ -35,6 +35,7 @@ func main() {
 	// The static Next.js app will be served under `/`.
 	app.Use(filesystem.New(filesystem.Config{
 		Root: http.FS(distFS),
+		MaxAge: 3600,
 	}))
 
 	// The Memory allocation stats API will be served under `/api`.
