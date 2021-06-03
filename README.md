@@ -3,6 +3,10 @@
 **golang-nextjs-portable** is a small Go program to showcase the `embed` package
 for bundling a static HTML export of a Next.js app.
 
+**<mark>After I fork these project from David Stotijn. </mark>**
+
+**<mark>I changed net/http to [Fiber V2](https://github.com/gofiber/fiber) and connect the [SQLite3](https://github.com/mattn/go-sqlite3) database for stress test.</mark>**
+
 👉 Read the companion
 [article](https://v0x.nl/articles/portable-apps-go-nextjs) that walks
 through this project.
@@ -11,7 +15,7 @@ through this project.
 
 ## Requirements
 
-- Go 1.16.4
+- Go 1.16
 - Yarn
 
 ## Installing
@@ -53,10 +57,10 @@ Run Go unit test
 $ go test -v
 ```
 
-Run Stress test
+Run Stress test on Windows 10
 
 ```bat
-$ C:\xampp\apache\bin\ab.exe -k -p test.json -T application/json -c 10000 -n 60000 http://localhost:8080/add
+$ C:\xampp\apache\bin\ab.exe -k -p test.json -T application/json -c 10000 -n 70000 http://localhost:8080/add
 ```
 
 Then run the binary:
