@@ -4,8 +4,6 @@ import useSWR from "swr";
 import React from 'react';
 import { Suspense } from 'react'
 
-
-
 async function fetcher(url: string) {
   const resp = await fetch(url);
   return resp.text();
@@ -14,22 +12,23 @@ async function fetcher(url: string) {
 const fetcherJson = url => fetch(url).then(r => r.json())
 
 function Index(): JSX.Element {
+
   const { data, error } = useSWR("/api", fetcher, { refreshInterval: 1000 });
 
   function Profile() {
-    const { data } = useSWR('/all', fetcherJson, { refreshInterval: 0 })
-    console.dir(data)
+     const { data } = useSWR('/all', fetcherJson, { refreshInterval: 10000 })
+     console.dir(data)
 
      return (<div>
               {data && data.map(todo => (
-                <div key={todo.id}>{todo.Id} name: {todo.name +" "+ todo.surname}</div>
+                <div key={todo.id}>id: {todo.id} name: {todo.name +" surname: "+ todo.surname}</div>
               ))}
             </div>);
-          }
+  }
 
   return (
-    <div className={styles.error}>
-      <h1>Hello, world!</h1>
+    <div>
+      <h1 className={styles.error}>Hello, world!</h1>
       <p>
         This is <code>pages/index.tsx</code>.
       </p>
@@ -37,7 +36,10 @@ function Index(): JSX.Element {
         Check out <Link href="/foo">foo</Link>.
       </p>
 
-      <h2>Memory allocation stats from Go server</h2>
+      <h2 className={styles.error}>Last 10 name</h2>
+      <Profile/>
+
+      <h2 className={styles.error}>Memory allocation stats from Go server</h2>
       {error && (
         <p>
           Error fetching profile: <strong>{error}</strong>
@@ -45,10 +47,7 @@ function Index(): JSX.Element {
       )}
       {!error && !data && <p>Loading ...</p>}
       {!error && data && <pre>{data}</pre>}
-
-        <Profile/>
-
-      </div>
+    </div>
   );
 }
 

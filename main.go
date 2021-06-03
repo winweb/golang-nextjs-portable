@@ -7,7 +7,6 @@ import (
 	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
-	//"github.com/gofiber/fiber/v2/middleware/pprof"
 	_ "github.com/mattn/go-sqlite3"
 	"io/fs"
 	"log"
@@ -38,10 +37,8 @@ func main() {
 		Root: http.FS(distFS),
 	}))
 
-	// The API will be served under `/api`.
+	// The Memory allocation stats API will be served under `/api`.
 	app.Get("/api", adaptor.HTTPHandlerFunc(handleAPI))
-
-	//app.Use(pprof.New()) ///debug/pprof
 
 	app.Get("/all", allPeople)
 
@@ -55,13 +52,12 @@ func main() {
 var (
 	db       *sql.DB
 	stmt     *sql.Stmt
-	res      sql.Result
 	noPeople int64
 	lid      int64
 )
 
 type People struct {
-	Id      int    `json:"id"`
+	Id      int64  `json:"id"`
 	Name    string `json:"name"`
 	Surname string `json:"surname"`
 }
@@ -69,13 +65,6 @@ type People struct {
 func initial() (err error) {
 	log.Println("initial data ...")
 
-	/*
-		normal sql command
-		PRAGMA journal_mode = WAL;
-	    PRAGMA locking_mode = EXCLUSIVE;
-		PRAGMA synchronous = normal;
-		PRAGMA temp_store = memory;
-	*/
 	db, err = sql.Open("sqlite3", "./date_file.db?_journal_mode=WAL&_synchronous=NORMAL&mode=rwc&cache=shared&_busy_timeout=20000")
 	if err != nil {
 		log.Println("database error")
@@ -84,24 +73,17 @@ func initial() (err error) {
 
 	db.SetMaxOpenConns(1)
 
-	if _, err = db.Exec("PRAGMA page_size= 65535;"); err != nil {
-		log.Printf("Failed to Exec PRAGMA page_size: %v", err)
-	}
-	if _, err = db.Exec("PRAGMA cache_size= 8000;"); err != nil {
-		log.Printf("Failed to Exec PRAGMA cache_size: %v", err)
-	}
-	if _, err = db.Exec("PRAGMA mmap_size = 30000000000;"); err != nil {
-		log.Printf("Failed to Exec PRAGMA mmap_size: %v", err)
-	}
+	db.Exec("PRAGMA page_size= 65535;")
+	db.Exec("PRAGMA cache_size= 8000;")
+	db.Exec("PRAGMA mmap_size = 30000000000;")
 
-	ddl := `
+	statement, _ := db.Prepare(`
         CREATE TABLE IF NOT EXISTS people (
             id INTEGER PRIMARY KEY,
             name TEXT,
             surname TEXT
         );
-    `
-	statement, _ := db.Prepare(ddl)
+    `)
 
 	_, err = db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS people_id_index ON people (id);")
 	if err != nil {
@@ -135,7 +117,7 @@ func initial() (err error) {
 func allPeople(c *fiber.Ctx) error{
 	log.Println("all people ...")
 
-	rows, _ := db.Query("SELECT id, name, surname FROM people")
+	rows, _ := db.Query("SELECT id, name, surname FROM people ORDER BY id DESC LIMIT 10")
 
 	defer rows.Close()
 
@@ -147,8 +129,7 @@ func allPeople(c *fiber.Ctx) error{
 
 		result = append(result, item)
 
-		var _ = strconv.Itoa(item.Id) + ": " + item.Name + " " + item.Surname
-		//log.Println(output)
+		var _ = strconv.FormatInt(item.Id, 10) + ": " + item.Name + " " + item.Surname
 	}
 
 	jsonB, _ := json.Marshal(result)
@@ -181,7 +162,7 @@ func addPeople(c *fiber.Ctx) error{
 
 	lid, _ = res.LastInsertId()
 
-	rows, _ := db.Query("SELECT id, name, surname FROM people WHERE id = " + strconv.FormatInt(lid, 10))
+	rows, _ := db.Query("SELECT id, name, surname FROM people WHERE id = ?", strconv.FormatInt(lid, 10))
 
 	defer rows.Close()
 
