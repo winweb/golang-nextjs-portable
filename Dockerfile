@@ -12,16 +12,23 @@ RUN yarn run export
 
 FROM golang:${GO_VERSION} AS go-builder
 WORKDIR /app
-COPY go.mod main.go ./
+COPY go.mod go.sum main.go ./
 COPY --from=node-builder /app/dist ./nextjs/dist
-RUN go mod download github.com/mattn/go-sqlite3
-RUN go get -d -v ./...
-RUN go install -v ./...
-RUN go build .
+
+RUN go mod download
+
+COPY . .
+
+RUN CGO_ENABLED=0 go build -a -ldflags "-linkmode external -extldflags '-static' -s -w"
+#RUN CGO_ENABLED=0 go build --tags "libsqlite3 linux sqlite_fts5"
 
 FROM alpine:${ALPINE_VERSION}
 WORKDIR /app
 COPY --from=go-builder /app/golang-nextjs-portable .
+
+RUN ls -la .
+
+VOLUME /db
 
 ENTRYPOINT ["./golang-nextjs-portable"]
 

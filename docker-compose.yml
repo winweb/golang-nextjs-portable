@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: . # Use an image built from the specified dockerfile in the `jar` directory.
+      dockerfile: Dockerfile
+    image: golang-nextjs:0.0.1
+    container_name: golang-nextjs-app
+    #restart: always
+    ports:
+      - 8080:8080
+    volumes:
+      - ./db:/db:delegated
