@@ -3,13 +3,13 @@
 **golang-nextjs-portable** is a small Go program to showcase the `embed` package
 for bundling a static HTML export of a Next.js app.
 
-**<mark>After I fork these project from David Stotijn. </mark>**
-
-**<mark>I changed net/http to [Fiber V2](https://github.com/gofiber/fiber) and connect the [SQLite3](https://github.com/mattn/go-sqlite3) database for stress test.</mark>**
-
 👉 Read the companion
 [article](https://v0x.nl/articles/portable-apps-go-nextjs) that walks
 through this project.
+
+### *** After I fork these project from David Stotijn.
+
+### *** I changed net/http to [Fiber V2](https://github.com/gofiber/fiber) and connect the [SQLite3](https://github.com/mattn/go-sqlite3) database for stress test.
 
 <img src="https://v0x.nl/assets/articles/golang-nextjs-portable-og.png">
 
