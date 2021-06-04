@@ -7,7 +7,6 @@ import (
 	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
-	_ "github.com/mattn/go-sqlite3"
 	"gorm.io/gorm"
 	"io/fs"
 	"log"
@@ -36,7 +35,26 @@ func main() {
 
 	initial()
 
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		// Override default error handler
+		ErrorHandler: func(c *fiber.Ctx, err error) error {
+			// Default 500 status code
+			code := fiber.StatusInternalServerError
+
+			if e, ok := err.(*fiber.Error); ok {
+				// Override status code if fiber.Error type
+				code = e.Code
+			}
+			
+			// Set Content-Type: text/plain; charset=utf-8
+			c.Set(fiber.HeaderContentType, fiber.MIMETextPlainCharsetUTF8)
+
+			log.Printf("error code: %v, %v", code, err.Error())
+
+			// Return status code with error message
+			return c.Status(code).SendString(err.Error())
+		},
+	})
 
 	// The static Next.js app will be served under `/`.
 	app.Use(filesystem.New(filesystem.Config{
@@ -97,6 +115,7 @@ func addPeople(c *fiber.Ctx) error{
 	people := new(models.People)
 
 	if err := c.BodyParser(people); err != nil {
+		log.Printf("error: add people. %v\n", err.Error())
 		return err
 	}
 
@@ -108,6 +127,7 @@ func addPeople(c *fiber.Ctx) error{
 	people.Surname = people.Surname + strconv.FormatInt(noPeople, 10)
 
 	if err := dbCon.Create(&people).Error; err != nil {
+		log.Printf("error: create people. %v\n", err.Error())
 		return err
 	}
 
