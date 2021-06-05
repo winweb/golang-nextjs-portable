@@ -4,3 +4,4 @@ date_file.db-wal
 main.exe
 
 .idea
+db/
