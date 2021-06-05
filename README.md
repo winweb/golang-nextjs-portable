@@ -63,6 +63,12 @@ Run Stress test on Windows 10
 $ C:\xampp\apache\bin\ab.exe -k -p test.json -T application/json -c 10000 -n 70000 http://localhost:8080/add
 ```
 
+Run Stress test with [Hay](https://github.com/rakyll/hey)
+
+```bat
+$ hey -m POST -D ./test.json -T "application/json" -c 10000 -n 50000 http://localhost:8080/add
+```
+
 Then run the binary:
 
 ```sh
