@@ -10,23 +10,25 @@ COPY nextjs/ .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN yarn run export
 
-FROM golang:${GO_VERSION} AS go-builder
+FROM golang:${GO_VERSION}-alpine AS go-builder
 WORKDIR /app
 COPY go.mod go.sum main.go ./
 COPY --from=node-builder /app/dist ./nextjs/dist
 
 RUN go mod download
 
+# Perform the build
 COPY . .
 
-RUN CGO_ENABLED=0 go build -a -ldflags "-linkmode external -extldflags '-static' -s -w"
-#RUN CGO_ENABLED=0 go build --tags "libsqlite3 linux sqlite_fts5"
+RUN apk update && apk add --no-cache musl-dev gcc build-base
+
+RUN CGO_ENABLED=1 go build
+#RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags "-linkmode external -extldflags '-static' -s -w"
+#RUN CGO_ENABLED=1 go build --tags "libsqlite3 linux sqlite_fts5"
 
 FROM alpine:${ALPINE_VERSION}
 WORKDIR /app
 COPY --from=go-builder /app/golang-nextjs-portable .
-
-RUN ls -la .
 
 VOLUME /db
 
