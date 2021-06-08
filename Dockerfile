@@ -20,9 +20,10 @@ RUN go mod download
 # Perform the build
 COPY . .
 
-RUN apk update && apk add --no-cache musl-dev gcc build-base
+RUN apk update
+RUN apk add --no-cache musl-dev gcc ca-certificates
 
-RUN CGO_ENABLED=1 go build
+RUN CGO_ENABLED=1 GOOS=linux go build
 #RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags "-linkmode external -extldflags '-static' -s -w"
 #RUN CGO_ENABLED=1 go build --tags "libsqlite3 linux sqlite_fts5"
 
