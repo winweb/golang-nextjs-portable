@@ -21,9 +21,9 @@ RUN go mod download
 COPY . .
 
 RUN apk update
-RUN apk add --no-cache musl-dev gcc ca-certificates
+RUN apk add --update gcc musl-dev
 
-RUN CGO_ENABLED=1 GOOS=linux go build -tags netgo -a -v
+RUN CGO_ENABLED=1 GOOS=linux go build --tags "linux netgo" -a -v
 #RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags "-linkmode external -extldflags '-static' -s -w"
 #RUN CGO_ENABLED=1 go build --tags "libsqlite3 linux sqlite_fts5"
 
