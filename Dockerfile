@@ -1,4 +1,4 @@
-ARG GO_VERSION=1.16.4
+ARG GO_VERSION=1.16.5
 ARG NODE_VERSION=14.17.0
 ARG ALPINE_VERSION=3.13.5
 
@@ -23,7 +23,7 @@ COPY . .
 RUN apk update
 RUN apk add --no-cache musl-dev gcc ca-certificates
 
-RUN CGO_ENABLED=1 GOOS=linux go build
+RUN CGO_ENABLED=1 GOOS=linux go build -tags netgo -a -v
 #RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags "-linkmode external -extldflags '-static' -s -w"
 #RUN CGO_ENABLED=1 go build --tags "libsqlite3 linux sqlite_fts5"
 
