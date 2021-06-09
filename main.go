@@ -78,7 +78,8 @@ func initial() (err error) {
 	var rooPath = "/db"
 
 	if _, err := os.Stat(rooPath); os.IsNotExist(err) {
-		log.Panicf("cannot access: %v", rooPath)
+		log.Printf("cannot access: %v\n", rooPath)
+		rooPath = "./db"
 	}
 
 	dbCon, err = database.DbOpen(rooPath + "/data_file.db")
