@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
+	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"gorm.io/gorm"
 	"io/fs"
 	"log"
@@ -53,6 +54,9 @@ func main() {
 		Root: http.FS(distFS),
 		MaxAge: 3600,
 	}))
+
+	// Default request id config
+	app.Use(requestid.New())
 
 	// The Memory allocation stats API will be served under `/api`.
 	app.Get("/api", adaptor.HTTPHandlerFunc(handleAPI))
