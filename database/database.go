@@ -52,7 +52,7 @@ func DbOpen(filename string) (*gorm.DB, error) {
 	_, err = sdb.Exec("PRAGMA page_size= 65535;")
 	_, err = sdb.Exec("PRAGMA mmap_size = 30000000000;")
 
-	err = db.AutoMigrate(&models.People{})
+	err = db.AutoMigrate(&models.People{},&models.CreditCard{})
 
 	_, err = sdb.Exec("CREATE UNIQUE INDEX IF NOT EXISTS people_id_index ON peoples (id);")
 

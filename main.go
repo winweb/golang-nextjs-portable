@@ -83,9 +83,11 @@ func initial() (err error) {
 
 	if _, err := os.Stat(rooPath); os.IsNotExist(err) {
 		rooPath = "./db"
-		err = os.Mkdir(rooPath, 0755)
-		if err != nil {
-			log.Fatal(err)
+		if _, err := os.Stat(rooPath); os.IsNotExist(err) {
+			err = os.Mkdir(rooPath, 0755)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 
@@ -145,13 +147,12 @@ func handleAPI(w http.ResponseWriter, _ *http.Request) {
 func allPeople(c *fiber.Ctx) error{
 	log.Println("all people ...")
 
-	var peoples []models.People
-
-	if err := dbCon.Limit(10).Order("id desc").Find(&peoples).Error; err != nil {
+	var people []models.People
+	if err := dbCon.Model(&people).Preload("CreditCards").Limit(10).Order("id desc").Find(&people).Error; err != nil {
 		return err
 	}
 
-	return c.Type("json", "utf-8").Status(fiber.StatusOK).JSON(peoples)
+	return c.Status(fiber.StatusOK).JSON(people)
 }
 
 func addPeople(c *fiber.Ctx) error{
@@ -167,8 +168,16 @@ func addPeople(c *fiber.Ctx) error{
 
 	log.Printf("add people no.: %v\n", noPeople)
 
-	people.Name = people.Name + strconv.FormatInt(noPeople, 10)
+	people.Name = "ทดสอบ " + people.Name + strconv.FormatInt(noPeople, 10)
 	people.Surname = people.Surname + strconv.FormatInt(noPeople, 10)
+
+	var creditCards = []models.CreditCard{{Number: "number1"}, {Number: "number2"}}
+
+	if noPeople % 2 == 0{
+		creditCards = nil
+	}
+
+	people.CreditCards = creditCards
 
 	if err := dbCon.Create(&people).Error; err != nil {
 		log.Printf("error: create people. %v\n", err.Error())
@@ -177,7 +186,7 @@ func addPeople(c *fiber.Ctx) error{
 
 	log.Printf("%v %v %v\n", people.Id, people.Name, people.Surname)
 
-	return c.Type("json", "utf-8").Status(fiber.StatusOK).JSON(people)
+	return c.Status(fiber.StatusOK).JSON(people)
 }
 
 func gracefulStop(app *fiber.App) (err error) {
