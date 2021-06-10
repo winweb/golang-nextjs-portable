@@ -82,8 +82,11 @@ func initial() (err error) {
 	var rooPath = "/db"
 
 	if _, err := os.Stat(rooPath); os.IsNotExist(err) {
-		log.Printf("cannot access: %v\n", rooPath)
 		rooPath = "./db"
+		err = os.Mkdir(rooPath, 0755)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	dbCon, err = database.DbOpen(rooPath + "/data_file.db")
