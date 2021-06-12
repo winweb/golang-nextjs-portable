@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"embed"
 	"fmt"
 	"github.com/dstotijn/golang-nextjs-portable/database"
@@ -26,7 +27,8 @@ var (
 	//go:embed nextjs/dist/_next/static/chunks/pages/*.js
 	//go:embed nextjs/dist/_next/static/*/*.js
 	nextFS embed.FS
-	dbCon *gorm.DB
+	db *gorm.DB
+	sdb *sql.DB
 	noPeople int64
 )
 
@@ -43,6 +45,8 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
+
+	defer sdb.Close()
 
 	app := fiber.New(fiber.Config{
 		// Override default error handler
@@ -91,22 +95,22 @@ func initial() (err error) {
 		}
 	}
 
-	dbCon, err = database.DbOpen(rooPath + "/data_file.db")
+	db, sdb, err = database.DbOpen(rooPath + "/data_file.db")
 	if err != nil {
 		return err
 	}
 
 	var count int64
-	dbCon.Find(&models.People{}).Count(&count)
+	db.Find(&models.People{}).Count(&count)
 
 	noPeople = count
 
 	log.Printf("no. people: %v", count)
 
 	if count == 0 {
-		dbCon.Create(&models.People{Name: "Nic1", Surname: "Robert1"})
-		dbCon.Create(&models.People{Name: "Nic2", Surname: "Robert2"})
-		dbCon.Create(&models.People{Name: "Nic3", Surname: "Robert3"})
+		db.Create(&models.People{Name: "Nic1", Surname: "Robert1"})
+		db.Create(&models.People{Name: "Nic2", Surname: "Robert2"})
+		db.Create(&models.People{Name: "Nic3", Surname: "Robert3"})
 
 	} else {
 		log.Println("not initial people data.")
@@ -148,7 +152,7 @@ func allPeople(c *fiber.Ctx) error{
 	log.Println("all people ...")
 
 	var people []models.People
-	if err := dbCon.Model(&people).Preload("CreditCards").Limit(10).Order("id desc").Find(&people).Error; err != nil {
+	if err := db.Model(&people).Preload("CreditCards").Limit(10).Order("id desc").Find(&people).Error; err != nil {
 		return err
 	}
 
@@ -179,8 +183,15 @@ func addPeople(c *fiber.Ctx) error{
 
 	people.CreditCards = creditCards
 
-	if err := dbCon.Create(&people).Error; err != nil {
-		log.Printf("error: create people. %v\n", err.Error())
+	err := db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Session(&gorm.Session{CreateBatchSize: 1}).Create(&people).Error; err != nil {
+			log.Printf("error: create people. %v\n", err.Error())
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		log.Printf("error: people transaction. %v\n", err.Error())
 		return err
 	}
 
