@@ -120,6 +120,9 @@ func initial() (err error) {
 }
 
 func customErrorHandler(c *fiber.Ctx, err error) error {
+
+	log.Printf("Fiber error: %v", err.Error())
+
 	// Default 500 status code
 	code := fiber.StatusInternalServerError
 
@@ -195,7 +198,7 @@ func addPeople(c *fiber.Ctx) error{
 		return err
 	}
 
-	log.Printf("%v %v %v\n", people.Id, people.Name, people.Surname)
+	log.Printf("%v %v %v\n", people.ID, people.Name, people.Surname)
 
 	return c.Status(fiber.StatusOK).JSON(people)
 }

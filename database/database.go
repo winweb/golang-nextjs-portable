@@ -57,7 +57,5 @@ func DbOpen(filename string) (*gorm.DB, *sql.DB, error) {
 
 	err = db.AutoMigrate(&models.People{}, &models.CreditCard{})
 
-	_, err = sdb.Exec("CREATE UNIQUE INDEX IF NOT EXISTS people_id_index ON peoples (id);")
-
 	return db, sdb, nil
 }
