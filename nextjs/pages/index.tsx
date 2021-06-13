@@ -2,7 +2,6 @@ import styles from '../styles/index.module.sass'
 import Link from "next/link";
 import useSWR from "swr";
 import React from 'react';
-import { Suspense } from 'react'
 
 async function fetcher(url: string) {
   const resp = await fetch(url);
@@ -15,7 +14,7 @@ function Index(): JSX.Element {
 
   const { data, error } = useSWR("/api", fetcher, { refreshInterval: 1000 });
 
-  function Profile() {
+  function Last10People() {
      const { data } = useSWR('/all', fetcherJson, { refreshInterval: 10000 })
      console.dir(data)
 
@@ -37,7 +36,7 @@ function Index(): JSX.Element {
       </p>
 
       <h2 className={styles.error}>Last 10 name</h2>
-      <Profile/>
+      <Last10People/>
 
       <h2 className={styles.error}>Memory allocation stats from Go server</h2>
       {error && (
