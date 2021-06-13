@@ -7,3 +7,8 @@ build-nextjs:
 .PHONY: build
 build: build-nextjs
 	go build .
+
+.PHONY: build-win
+build-win:
+	cd nextjs && yarn install && npx next telemetry disable && yarn run export-win
+	go build .
