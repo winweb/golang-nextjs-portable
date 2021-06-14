@@ -34,7 +34,6 @@ function Index(): JSX.Element {
       <p>
         Check out <Link href="/foo">foo</Link>.
       </p>
-
       <h2 className={styles.error}>Last 10 name</h2>
       <Last10People/>
 

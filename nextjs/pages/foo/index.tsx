@@ -20,18 +20,6 @@ const useStyles = makeStyles((theme) => ({
 
 const fetcherJson = url => fetch(url).then(r => r.json())
 
-const rows2: GridRowsProp = [
-    { id: 1, name: 'Hello', surname: 'World' },
-    { id: 2, name: 'XGrid', surname: 'is Awesome' },
-    { id: 3, name: 'Material-UI', surname: 'is Amazing' },
-];
-
-const columns: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 150 },
-    { field: 'name', headerName: 'Name', width: 150 },
-    { field: 'surname', headerName: 'Surname', width: 150 },
-];
-
 function Foo(): JSX.Element {
 
     const classes = useStyles();
@@ -70,7 +58,7 @@ function Foo(): JSX.Element {
                 This is <code>pages/foo/index.tsx</code>.
             </p>
             <p>
-                Check out <Link href="/foo/bar">bar</Link>.
+                Check out <Link href="/foo/darkTheme">Dark Theme</Link>.
             </p>
 
             <form onSubmit={registerPeople} className={classes.root} noValidate autoComplete="off">
