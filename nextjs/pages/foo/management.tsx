@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
 
 const fetcherJson = url => fetch(url).then(r => r.json())
 
-function Foo(): JSX.Element {
+function Management(): JSX.Element {
 
     const classes = useStyles();
 
@@ -48,7 +48,7 @@ function Foo(): JSX.Element {
         const { data } = useSWR('/all', fetcherJson, { refreshInterval: 10000 })
         console.dir(data)
 
-        return data
+        return !data?[]:data
     }
 
     return (
@@ -58,7 +58,7 @@ function Foo(): JSX.Element {
                 This is <code>pages/foo/index.tsx</code>.
             </p>
             <p>
-                Check out <Link href="/foo/darkTheme">Dark Theme</Link>.
+                Check out <Link href="/foo/darkTheme" replace>Dark Theme</Link>.
             </p>
 
             <form onSubmit={registerPeople} className={classes.root} noValidate autoComplete="off">
@@ -86,4 +86,4 @@ function Foo(): JSX.Element {
     );
 }
 
-export default Foo;
+export default Management;

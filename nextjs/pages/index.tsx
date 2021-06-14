@@ -32,7 +32,7 @@ function Index(): JSX.Element {
         This is <code>pages/index.tsx</code>.
       </p>
       <p>
-        Check out <Link href="/foo">foo</Link>.
+        Check out <Link href="/foo/management" replace>management</Link>.
       </p>
       <h2 className={styles.error}>Last 10 name</h2>
       <Last10People/>

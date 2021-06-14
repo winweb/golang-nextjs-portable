@@ -53,9 +53,24 @@ func main() {
 		ErrorHandler: customErrorHandler,
 	})
 
+	app.Use("/foo", filesystem.New(filesystem.Config{
+		Root: http.Dir("./nextjs/dist/foo/management.html"),
+		MaxAge: 3600,
+	}))
+
 	// The static Next.js app will be served under `/`.
 	app.Use(filesystem.New(filesystem.Config{
 		Root: http.FS(distFS),
+		MaxAge: 3600,
+	}))
+
+	app.Use("/foo/management", filesystem.New(filesystem.Config{
+		Root: http.Dir("./nextjs/dist/foo/management.html"),
+		MaxAge: 3600,
+	}))
+
+	app.Use("/foo/darkTheme", filesystem.New(filesystem.Config{
+		Root: http.Dir("./nextjs/dist/foo/darkTheme.html"),
 		MaxAge: 3600,
 	}))
 

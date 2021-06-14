@@ -20,7 +20,7 @@ const DarkTheme = () => {
             <Paper>
                 <Typography variant='h1'>This is <code>pages/foo/darkTheme.tsx</code></Typography>
 
-                <Typography variant='body2'>Check out <Link href="/">the homepage</Link>.</Typography>
+                <Typography variant='body2'>Check out <Link href="/" replace>the homepage</Link>.</Typography>
             </Paper>
         </ThemeProvider>
     )
