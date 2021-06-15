@@ -53,24 +53,30 @@ func main() {
 		ErrorHandler: customErrorHandler,
 	})
 
+	// handle forbidden error by Fiber
 	app.Use("/foo", filesystem.New(filesystem.Config{
 		Root: http.Dir("./nextjs/dist/foo/management.html"),
 		MaxAge: 3600,
 	}))
 
+	// handle route wildcard html file by Fiber
+	app.Get("/foo/:path?", func(c *fiber.Ctx) error {
+		var  path = c.Params("path")
+
+		if len(path) == 0 {
+			path = "index"
+		}
+
+		log.Printf("path: %v", path)
+
+		fooFS, _ := fs.Sub(nextFS, "nextjs/dist/foo")
+
+		return filesystem.SendFile(c, http.FS(fooFS), path + ".html")
+	})
+
 	// The static Next.js app will be served under `/`.
 	app.Use(filesystem.New(filesystem.Config{
 		Root: http.FS(distFS),
-		MaxAge: 3600,
-	}))
-
-	app.Use("/foo/management", filesystem.New(filesystem.Config{
-		Root: http.Dir("./nextjs/dist/foo/management.html"),
-		MaxAge: 3600,
-	}))
-
-	app.Use("/foo/darkTheme", filesystem.New(filesystem.Config{
-		Root: http.Dir("./nextjs/dist/foo/darkTheme.html"),
 		MaxAge: 3600,
 	}))
 
