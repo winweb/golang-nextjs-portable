@@ -63,10 +63,6 @@ func main() {
 	app.Get("/foo/:path?", func(c *fiber.Ctx) error {
 		var  path = c.Params("path")
 
-		if len(path) == 0 {
-			path = "index"
-		}
-
 		log.Printf("path: %v", path)
 
 		fooFS, _ := fs.Sub(nextFS, "nextjs/dist/foo")
